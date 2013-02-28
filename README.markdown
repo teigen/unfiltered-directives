@@ -47,14 +47,18 @@ good and readable code. The following example behaves exactly like the previous 
 
     import directives._, Directives._
 
-    def intent = Intent{
-      case "/example" =>
+    // it's simple to define your own directives
+    def contentType(tpe:String) =
+      when{ case RequestContentType(`tpe`) => } orElse UnsupportedMediaType
+
+    def intent = Path.Intent {
+      case Seg(List("example", id)) =>
         for {
           _ <- POST
           _ <- contentType("application/json")
           _ <- Accepts.Json
-          b <- Body.bytes _
-        } yield Ok ~> JsonContent ~> ResponseBytes(b)
+          r <- request[Any]
+        } yield Ok ~> JsonContent ~> ResponseBytes(Body bytes r)
     }
 
 4 - Reuse
@@ -67,11 +71,8 @@ Directives are composable and simple to reuse. This example demonstrates how you
 
 	case class User(name:String)
 
-    // directive giving access to the underlying HttpServletRequest
-	def servletRequest = request[HttpServletRequest].map(_.underlying)
-
-    // depending on the servlet request directive, providing the HttpSession
-	def session = servletRequest.map(_.getSession)
+    // depending on the underlying request directive, providing the HttpSession
+	def session = underlying[HttpServletRequest].map(_.getSession)
 
     // depending on the session directive, getting the User from session, orElse redirecting user to the `"/login"` page
 	def user = session.flatMap{ s =>

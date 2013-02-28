@@ -31,7 +31,7 @@ trait FailResult[-R, +A]{
   def map[X](f:ResponseFunction[R] => ResponseFunction[X]):Result[X, A]
 }
 
-case class Success[-R, +A](value:A) extends Result[Any, A]
+case class Success[+A](value:A) extends Result[Any, A]
 
 case class Failure[-R](response:ResponseFunction[R]) extends Result[R, Nothing]
 

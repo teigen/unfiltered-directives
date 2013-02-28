@@ -1,6 +1,6 @@
 import org.eclipse.jetty.server.session.SessionHandler
-import org.eclipse.jetty.servlet.{ServletHolder, ServletContextHandler}
 import unfiltered.filter.Plan
+import unfiltered.filter.request.ContextPath
 import unfiltered.jetty.Http
 import unfiltered.request._
 import unfiltered.response._
@@ -46,18 +46,26 @@ object Demo1 extends Demo {
   }
 }
 
-object Demo2 extends Demo {
+object Demo2 extends App {
+  Http(8080).filter(new DemoPlan2).run()
+}
+
+class DemoPlan2 extends Plan {
   // good code, good http
   import directives._, Directives._
 
-  def intent = Intent{
+  // it's simple to define your own directives
+  def contentType(tpe:String) =
+    when{ case RequestContentType(`tpe`) => } orElse UnsupportedMediaType
+
+  def intent = Path.Intent {
     case Seg(List("example", id)) =>
       for {
         _ <- POST
         _ <- contentType("application/json")
         _ <- Accepts.Json
-        b <- Body.bytes _
-      } yield Ok ~> JsonContent ~> ResponseBytes(b)
+        r <- request[Any]
+      } yield Ok ~> JsonContent ~> ResponseBytes(Body bytes r)
   }
 }
 
@@ -71,11 +79,11 @@ class DemoPlan3 extends Plan {
   import directives._, Directives._
   import javax.servlet.http.HttpServletRequest
 
+  val Intent = Directive.Intent[HttpServletRequest, String]{ case ContextPath(_, path) => path }
+
   case class User(name:String)
 
-  def servletRequest = request[HttpServletRequest].map(_.underlying)
-
-  def session = servletRequest.map{ _.getSession }
+  def session = underlying[HttpServletRequest].map{ _.getSession }
 
   def user = session.flatMap{ s =>
     val u = Option(s.getAttribute("user")).map(_.asInstanceOf[User])
@@ -98,10 +106,12 @@ class DemoPlan3 extends Plan {
           </form>)
 
       // curl -v http://localhost:8080/login -XPOST
+      object userParam extends Params.Extract("user", Params.first)
+
       val post = for{
-        _ <- POST
-        name <- parameter("user").fail ~> ResponseString("user required")
-        s <- session
+        _    <- POST
+        name <- userParam.fail ~> ResponseString("user required")
+        s    <- session
       } yield {
         s.setAttribute("user", User(name))
         Redirect("/")
