@@ -1,8 +1,10 @@
-name := "unfiltered-directives"
+releaseSettings
 
 organization := "com.jteigen"
 
-version := "0.1.0-SNAPSHOT"
+name := "unfiltered-directives"
+
+description := "monadic api for unfiltered"
 
 scalaVersion := "2.10.0"
 
@@ -20,3 +22,32 @@ libraryDependencies += "net.databinder" %% "unfiltered" % "0.6.7"
 libraryDependencies ++= Seq(
     "net.databinder" %% "unfiltered-jetty" % "0.6.7" % "test",
     "net.databinder" %% "unfiltered-filter" % "0.6.7" % "test")
+
+publishMavenStyle := true
+
+publishTo <<= version { (v: String) =>
+  val nexus = "https://oss.sonatype.org/"
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+homepage := Some(url("http://github.com/teigen/unfiltered-directives"))
+
+pomExtra := (
+  <scm>
+    <url>git@github.com:teigen/unfiltered-directives.git</url>
+    <connection>scm:git:git@github.com:teigen/unfiltered-directives.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>jteigen</id>
+      <name>Jon-Anders Teigen</name>
+      <url>http://jteigen.com</url>
+    </developer>
+  </developers>)
