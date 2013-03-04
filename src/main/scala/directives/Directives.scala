@@ -3,9 +3,10 @@ package directives
 import unfiltered.request._
 import unfiltered.response._
 
-object Directives extends Directives
+object Directives extends Directives with Syntax
 
 trait Directives {
+  import Result.{Success, Failure, Error}
 
   def result[R, A](r:Result[R, A]) = Directive[Any, R, A](_ => r)
 
@@ -60,24 +61,4 @@ trait Directives {
   def remoteAddr = request[Any] map { _.remoteAddr }
 
   def queryParams = request[Any].map{ case QueryParams(params) => params }
-
-  implicit def defMethod(M:Method) =
-    when{ case M(_) => } orElse MethodNotAllowed
-
-  implicit def accepting(A:Accepts.Accepting) =
-    when{ case A(_) => } orElse NotAcceptable
-
-  implicit def defQueryParams(q:QueryParams.type) =
-    queryParams
-
-  implicit def defExtract[A](Ex:Params.Extract[Nothing, A]) =
-    when{ case Params(Ex(a)) => a } orElse BadRequest
-
-  implicit def defPathIntent(p:Path.type) = PathIntentions
-
-  object PathIntentions {
-    def Intent = PathIntent
-  }
-
-  val PathIntent = Directive.Intent(Path[Any])
 }

@@ -69,6 +69,29 @@ class DemoPlan2 extends Plan {
   }
 }
 
+object DemoPlan2_1 extends App {
+  Http(8080).filter(new DemoPlan2_1).run()
+}
+
+class DemoPlan2_1 extends Plan {
+  import directives._, Directives._
+
+  // existing types can be decoratet ( Eq, Gt and Lt )
+  implicit val contentType = Directive.Eq{ (R:RequestContentType.type, value:String) =>
+    when{ case R(`value`) => value } orElse UnsupportedMediaType
+  }
+
+  def intent = Path.Intent {
+    case Seg(List("example", id)) =>
+      for {
+        _ <- POST
+        _ <- RequestContentType === "application/json" // <-- look at the awesome syntax
+        _ <- Accepts.Json
+        r <- request[Any]
+      } yield Ok ~> JsonContent ~> ResponseBytes(Body bytes r)
+  }
+}
+
 object Demo3 extends App {
   val http = Http(8080).filter(new DemoPlan3)
   http.current.setSessionHandler(new SessionHandler)

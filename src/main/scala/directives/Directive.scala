@@ -3,8 +3,11 @@ package directives
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
 import unfiltered.Cycle
+import annotation.implicitNotFound
 
 object Directive {
+  import Result.{Success, Failure, Error}
+
   def apply[T, R, A](run:HttpRequest[T] => Result[R, A]):Directive[T, R, A] =
     new Directive[T, R, A](run)
 
@@ -22,6 +25,15 @@ object Directive {
       }
     }
   }
+
+  @implicitNotFound("implicit instance of Directive.Eq[${X}, ${V}, ?, ?, ?] not found")
+  case class Eq[-X, -V, -T, -R, +A](directive:(X, V) => Directive[T, R, A])
+
+  @implicitNotFound("implicit instance of Directive.Gt[${X}, ${V}, ?, ?, ?] not found")
+  case class Gt[-X, -V, -T, -R, +A](directive:(X, V) => Directive[T, R, A])
+
+  @implicitNotFound("implicit instance of Directive.Lt[${X}, ${V}, ?, ?, ?] not found")
+  case class Lt[-X, -V, -T, -R, +A](directive:(X, V) => Directive[T, R, A])
 }
 
 class Directive[-T, -R, +A](run:HttpRequest[T] => Result[R, A]) extends (HttpRequest[T] => Result[R, A]){

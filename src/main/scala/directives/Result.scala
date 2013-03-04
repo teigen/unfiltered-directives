@@ -2,7 +2,21 @@ package directives
 
 import unfiltered.response.ResponseFunction
 
+object Result {
+  case class Success[+A](value:A) extends Result[Any, A]
+
+  case class Failure[-R](response:ResponseFunction[R]) extends Result[R, Nothing]
+
+  case class Error[-R](response:ResponseFunction[R]) extends Result[R, Nothing]
+
+  trait FailResult[-R, +A]{
+    def map[X](f:ResponseFunction[R] => ResponseFunction[X]):Result[X, A]
+  }
+}
+
 sealed trait Result[-R, +A] { result =>
+  import Result._
+
   def map[RR <: R, B](f:A => B):Result[RR, B] =
     flatMap[RR, B](value => Success(f(value)))
 
@@ -26,13 +40,3 @@ sealed trait Result[-R, +A] { result =>
     }
   }
 }
-
-trait FailResult[-R, +A]{
-  def map[X](f:ResponseFunction[R] => ResponseFunction[X]):Result[X, A]
-}
-
-case class Success[+A](value:A) extends Result[Any, A]
-
-case class Failure[-R](response:ResponseFunction[R]) extends Result[R, Nothing]
-
-case class Error[-R](response:ResponseFunction[R]) extends Result[R, Nothing]
