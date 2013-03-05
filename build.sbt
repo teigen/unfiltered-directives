@@ -1,3 +1,5 @@
+import com.typesafe.sbt.pgp.PgpKeys
+
 releaseSettings
 
 organization := "com.jteigen"
@@ -32,6 +34,8 @@ publishTo <<= version { (v: String) =>
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+
+publish <<= PgpKeys.publishSigned
 
 publishArtifact in Test := false
 
