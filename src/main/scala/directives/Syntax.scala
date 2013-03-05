@@ -10,20 +10,20 @@ trait Syntax extends Directives {
     def ===[V, T, R, A](v:V)(implicit eq:Eq[X, V, T, R, A]) = eq.directive(x, v)
     def in[V, T, R, A](vs:Seq[V])(implicit eq:Eq[X, V, T, R, A]) = vs.map(v => eq.directive(x,v)).reduce(_ | _)
 
-    def gt[V, T, R, A](v:V)(implicit g:Gt[X, V, T, R, A]) = g.directive(x, v)
-    def > [V, T, R, A](v:V)(implicit g:Gt[X, V, T, R, A]) = gt(v)
+    def gt[V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A]) = gtd.directive(x, v)
+    def > [V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A]) = gt(v)
 
-    def lt[V, T, R, A](v:V)(implicit l:Lt[X, V, T, R, A]) = l.directive(x, v)
-    def <[V, T, R, A](v:V)(implicit l:Lt[X, V, T, R, A])  = lt(v)
+    def lt[V, T, R, A](v:V)(implicit ltd:Lt[X, V, T, R, A]) = ltd.directive(x, v)
+    def <[V, T, R, A](v:V)(implicit ltd:Lt[X, V, T, R, A])  = lt(v)
 
-    def lte[V, T, R, A](v:V)(implicit ltd:Lt[X, V, T, R, A], eqd:Eq[X, V, T, R, A]) =
-      ltd.directive(x, v) orElse eqd.directive(x, v)
+    def lte[V, T, R, A](v:V)(implicit lted:Lt[X, V, T, R, A], eqd:Eq[X, V, T, R, A]) =
+      lted.directive(x, v) orElse eqd.directive(x, v)
     def <=[V, T, R, A](v:V)(implicit ltd:Lt[X, V, T, R, A], eqd:Eq[X, V, T, R, A]) =
       lte(v)
 
-    def gte[V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A], eqd:Eq[X, V, T, R, A]) =
-      gtd.directive(x, v) orElse eqd.directive(x, v)
-    def >=[V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A], eqd:Eq[X, V, T, R, A]) = gte(v)
+    def gte[V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A], eq:Eq[X, V, T, R, A]) =
+      gtd.directive(x, v) orElse eq.directive(x, v)
+    def >=[V, T, R, A](v:V)(implicit gtd:Gt[X, V, T, R, A], eq:Eq[X, V, T, R, A]) = gte(v)
   }
 
   implicit def ops[X](x:X) = new Ops[X](x)
