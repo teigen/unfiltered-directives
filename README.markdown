@@ -3,6 +3,12 @@ Unfiltered-Directives
 
 A monadic api for [Unfiltered](http://github.com/unfiltered/unfiltered) demonstrated at [NEScala 2013](http://nescala.org/)
 
+Download / Use
+========
+Unfiltered-Directives is published to maven central for scala versions "2.9.1-1", "2.9.2" and "2.10.0"
+
+    libraryDependencies += "com.jteigen" %% "unfiltered-directives" % "0.1"
+
 Why ?
 =====
 Writing well behaved http applications is hard. You are often left with the choice between readable code and a well behaved application.
@@ -96,8 +102,6 @@ Directives are composable and simple to reuse. This example demonstrates how you
 
 Runnable examples are available under `src/test/scala`
 
-Note
+Licence
 -----
-The API is not released yet and daring users should expect bugs. Use at your own risk!
-
 MIT licenced (same licence as Unfiltered)
