@@ -1,3 +1,8 @@
+[This is now an official part of [Unfiltered](https://github.com/unfiltered/unfiltered/tree/master/directives)]
+=========================
+Use the official Unfiltered version, and ignore this one.. its no longer maintained
+---------
+
 Unfiltered-Directives
 =====================
 
