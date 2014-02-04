@@ -4,9 +4,9 @@ import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
 import unfiltered.Cycle
 import annotation.implicitNotFound
+import Result.{Success, Failure, Error}
 
 object Directive {
-  import Result.{Success, Failure, Error}
 
   def apply[T, R, A](run:HttpRequest[T] => Result[R, A]):Directive[T, R, A] =
     new Directive[T, R, A](run)
@@ -45,6 +45,13 @@ class Directive[-T, -R, +A](run:HttpRequest[T] => Result[R, A]) extends (HttpReq
 
   def flatMap[TT <: T, RR <: R, B](f:A => Directive[TT, RR, B]):Directive[TT, RR, B] =
     Directive(r => run(r).flatMap(a => f(a)(r)))
+    
+  def fold[RR,AA](fs:A=>Result[RR,AA], ff:ResponseFunction[R]=>Result[RR,AA], fe:ResponseFunction[R]=>Result[RR,AA]) = 
+    Directive[T, RR, AA]{ r => run(r) match {
+      case Success(s) => fs(s)
+      case Failure(f) => ff(f)
+      case Error(e)   => fe(e)
+    }}  
 
   def orElse[TT <: T, RR <: R, B >: A](next: => Directive[TT, RR, B]):Directive[TT, RR, B] =
     Directive(r => run(r).orElse(next(r)))
